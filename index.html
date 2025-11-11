@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>luch0fr</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --accent: #eaeaea;
+      --glass-bg: rgba(8,8,8,0.45);
+      --blur: 10px;
+      font-family: "Unbounded", system-ui, sans-serif;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box }
+    body {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background-color:#000;
+      color:var(--accent);
+      overflow:hidden;
+    }
+
+    /* Fondo con blur oscuro */
+    .bg {
+      position:fixed;
+      inset:0;
+      background:url("ASSETS/background.jpg") center/cover no-repeat;
+      filter:brightness(0.25) contrast(0.9);
+      z-index:0;
+    }
+    .bg::after{
+      content:"";
+      position:absolute; inset:0;
+      backdrop-filter:blur(var(--blur));
+      -webkit-backdrop-filter:blur(var(--blur));
+    }
+
+    /* pantalla inicial */
+    .start-screen {
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index:2;
+      cursor:pointer;
+      transition:opacity .8s ease;
+    }
+
+    .start-screen h1 {
+      font-size:32px;
+      font-weight:800;
+      letter-spacing:2px;
+      color:#fff;
+      text-shadow:0 0 12px rgba(255,255,255,0.8);
+      text-transform:uppercase;
+      user-select:none;
+      transition:transform .3s ease, opacity .3s ease;
+      animation:pulseGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { text-shadow: 0 0 8px rgba(255,255,255,0.5), 0 0 16px rgba(255,255,255,0.3); opacity: 0.95; }
+      50% { text-shadow: 0 0 16px rgba(255,255,255,0.9), 0 0 32px rgba(255,255,255,0.6); opacity: 1; }
+    }
+
+    .start-screen:hover h1 {
+      transform:scale(1.05);
+      opacity:.95;
+    }
+
+    /* contenedor principal */
+    main {
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 1.4s ease;
+      position:relative;
+      z-index:3;
+      width:100%;
+      max-width:940px;
+      padding:36px;
+      display:flex;
+      justify-content:center;
+    }
+
+    main.active {
+      opacity:1;
+      pointer-events:auto;
+    }
+
+    .card {
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:16px;
+      padding:34px;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-start;
+      box-shadow:0 8px 30px rgba(0,0,0,0.6);
+      position:relative;
+    }
+
+    .header-row {
+      display:flex;
+      align-items:center;
+      gap:16px;
+      width:100%;
+      margin-bottom:14px;
+    }
+
+    .avatar {
+      width:70px;
+      height:70px;
+      border-radius:14px;
+      overflow:hidden;
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.04);
+      flex-shrink:0;
+    }
+
+    .avatar img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .profile-info h1 {
+      font-size:28px;
+      font-weight:800;
+      color:var(--accent);
+    }
+
+    .uid {
+      display:inline-block;
+      margin-left:8px;
+      padding:6px 10px;
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.03);
+      border-radius:10px;
+      font-family:monospace;
+      font-size:12px;
+    }
+
+    .socials {
+      display:flex;
+      gap:18px;
+      margin-top:6px;
+      flex-wrap:wrap;
+    }
+
+    .socials a {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:42px;
+      height:42px;
+      border-radius:10px;
+      background:rgba(255,255,255,0.02);
+      border:1px solid rgba(255,255,255,0.02);
+      font-size:20px;
+      transition:transform .14s ease, background .14s ease;
+      color:var(--accent);
+    }
+
+    .socials a:hover { transform:translateY(-4px); background:rgba(255,255,255,0.04) }
+
+    /* audio player */
+    .audio-row {
+      margin-top:24px;
+      display:flex;
+      align-items:center;
+      gap:16px;
+      border-top:1px dashed rgba(255,255,255,0.05);
+      padding-top:18px;
+      width:100%;
+    }
+
+    .audio-cover {
+      width:64px;
+      height:64px;
+      border-radius:8px;
+      overflow:hidden;
+      flex-shrink:0;
+      border:1px solid rgba(255,255,255,0.05);
+    }
+
+    .audio-cover img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .audio-controls {
+      flex:1;
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+
+    .progress {
+      flex:1;
+      -webkit-appearance:none;
+      appearance:none;
+      height:6px;
+      background:rgba(255,255,255,0.08);
+      border-radius:6px;
+      outline:none;
+    }
+    .progress::-webkit-slider-thumb {
+      -webkit-appearance:none;
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      background:#fff;
+      margin-top:-4px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .small-play {
+      width:44px;
+      height:44px;
+      border-radius:50%;
+      border:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(255,255,255,0.03);
+      font-size:18px;
+      cursor:pointer;
+    }
+
+    .volume {
+      width:110px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .volume input { width:100% }
+
+    @media(max-width:740px){
+      .profile-info h1{font-size:22px}
+      .avatar{width:60px;height:60px}
+    }
+  </style>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <!-- Pantalla inicial -->
+  <div class="start-screen" id="start">
+    <h1>insanity</h1>
+  </div>
+
+  <!-- Contenido principal -->
+  <main id="mainContent">
+    <section class="card">
+      <div class="header-row">
+        <div class="avatar"><img src="ASSETS/pfp.jpg" alt="pfp"></div>
+        <div class="profile-info">
+          <h1>luch0fr<span class="uid">#1337</span></h1>
+          <div class="socials">
+            <a href="https://open.spotify.com/user/bg450jitga5bm18ojz7pv8kgq?si=911e2fe4096e470e" target="_blank"><i class="fa-brands fa-spotify"></i></a>
+            <a href="https://steamcommunity.com/id/luch0fr/" target="_blank"><i class="fa-brands fa-steam"></i></a>
+            <a href="#" id="discordBtn"><i class="fa-brands fa-discord"></i></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="audio-row">
+        <div class="audio-cover"><img src="ASSETS/cover.png" alt="cover"></div>
+        <div class="audio-controls">
+          <div id="currentTime" style="width:50px;font-size:13px;">0:00</div>
+          <input id="progress" class="progress" type="range" min="0" max="100" value="0" step="0.1">
+          <div id="duration" style="width:50px;font-size:13px;">0:00</div>
+          <button id="playBtn" class="small-play"><i id="playIcon" class="fa fa-play"></i></button>
+          <div class="volume"><i class="fa fa-volume-high"></i><input id="volume" type="range" min="0" max="1" step="0.01" value="0.15"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <audio id="player" src="ASSETS/audio.mp3" preload="metadata"></audio>
+
+  <script>
+    const start = document.getElementById('start');
+    const main = document.getElementById('mainContent');
+    const player = document.getElementById('player');
+    const playBtn = document.getElementById('playBtn');
+    const playIcon = document.getElementById('playIcon');
+    const progress = document.getElementById('progress');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationEl = document.getElementById('duration');
+    const volume = document.getElementById('volume');
+    const discordBtn = document.getElementById('discordBtn');
+
+    const fmt = s => isNaN(s)?'0:00':`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+
+    // transición de entrada y reproducción automática
+    start.addEventListener('click', ()=>{
+      start.style.opacity = 0;
+      setTimeout(()=>start.style.display='none',800);
+      main.classList.add('active');
+      player.play().catch(()=>{});
+    });
+
+    player.addEventListener('loadedmetadata',()=>durationEl.textContent=fmt(player.duration));
+    player.addEventListener('timeupdate',()=>{
+      progress.value=(player.currentTime/player.duration)*100||0;
+      currentTimeEl.textContent=fmt(player.currentTime);
+    });
+    progress.addEventListener('input',e=>player.currentTime=(e.target.value/100)*player.duration);
+    volume.addEventListener('input',()=>player.volume=volume.value);
+    playBtn.addEventListener('click',()=>player.paused?player.play():player.pause());
+    player.addEventListener('play',()=>playIcon.className='fa fa-pause');
+    player.addEventListener('pause',()=>playIcon.className='fa fa-play');
+
+    discordBtn.addEventListener('click',e=>{
+      e.preventDefault();
+      navigator.clipboard.writeText('luch0fr').then(()=>{
+        discordBtn.innerHTML='<i class="fa-brands fa-discord"></i>';
+        const span=document.createElement('span');
+        span.textContent='✔️';
+        discordBtn.appendChild(span);
+        setTimeout(()=>discordBtn.innerHTML='<i class="fa-brands fa-discord"></i>',1200);
+      });
+    });
+  </script>
+</body>
+</html>
